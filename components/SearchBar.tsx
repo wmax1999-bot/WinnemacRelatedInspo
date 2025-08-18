@@ -21,12 +21,12 @@ export default function SearchBar() {
   return (
     <form
       onSubmit={go}
-      className="flex flex-wrap gap-2 bg-white/95 rounded-2xl p-2 shadow ring-1 ring-black/5"
+      className="flex flex-wrap gap-2 bg-white/95 rounded-2xl p-2 shadow ring-1 ring-black/5 text-gray-900"
     >
       <select
         value={beds}
         onChange={(e) => setBeds(e.target.value)}
-        className="px-4 py-2 rounded-xl border bg-white"
+        className="px-4 py-2 rounded-xl border bg-white text-gray-900"
         aria-label="Minimum beds"
       >
         <option value="">Beds</option>
@@ -42,23 +42,9 @@ export default function SearchBar() {
         type="number"
         min={0}
         placeholder="Min $"
-        className="px-4 py-2 rounded-xl border bg-white w-28"
+        className="px-4 py-2 rounded-xl border bg-white w-28 text-gray-900 placeholder-gray-600"
         aria-label="Minimum rent"
       />
 
       <input
         value={max}
-        onChange={(e) => setMax(e.target.value)}
-        type="number"
-        min={0}
-        placeholder="Max $"
-        className="px-4 py-2 rounded-xl border bg-white w-28"
-        aria-label="Maximum rent"
-      />
-
-      <button className="px-5 py-2 rounded-xl bg-black text-white">
-        Search
-      </button>
-    </form>
-  );
-}
