@@ -22,11 +22,16 @@ export default function Header() {
   return (
     <header
       className={`fixed top-0 inset-x-0 z-40 transition
-      ${solid ? "bg-white/95 backdrop-blur border-b shadow-sm" : "bg-transparent"}
-    `}
+        ${solid
+          ? "bg-white/95 backdrop-blur border-b border-gray-200 shadow-sm"
+          : "bg-black/35 backdrop-blur-[2px] border-b border-white/10"}
+      `}
     >
       <div className="container flex items-center justify-between h-16">
-        <Link href="/" className={`font-semibold text-lg ${solid ? "text-gray-900" : "text-white drop-shadow"}`}>
+        <Link
+          href="/"
+          className={`font-semibold text-lg ${solid ? "text-gray-900" : "text-white drop-shadow"}`}
+        >
           Winnemac
         </Link>
 
@@ -35,14 +40,17 @@ export default function Header() {
             <Link
               key={i.href}
               href={i.href}
-              className={`${solid ? "text-gray-800" : "text-white"} text-sm hover:opacity-75`}
+              className={`${solid ? "text-gray-800" : "text-white drop-shadow"} text-sm hover:opacity-80`}
             >
               {i.label}
             </Link>
           ))}
         </nav>
 
-        <Link href="/properties" className={`${solid ? "text-gray-800" : "text-white"} md:hidden text-sm underline`}>
+        <Link
+          href="/properties"
+          className={`${solid ? "text-gray-800" : "text-white drop-shadow"} md:hidden text-sm underline`}
+        >
           Browse
         </Link>
       </div>
