@@ -72,7 +72,7 @@ export default function Hero() {
         {/* Include this only if the file exists */}
         <source src="/images/hero.webm" type="video/webm" />
         {/* MP4 fallback (ensure exact filename + case in /public/images) */}
-        <source src="/images/chicago_drone_shot.mp4" type="video/mp4" />
+        <source src="/images/chicago_drone_shot.mp4.mp4" type="video/mp4" />
       </video>
 
       {/* stronger gradient for nav contrast */}
