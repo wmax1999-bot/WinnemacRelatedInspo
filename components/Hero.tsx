@@ -64,15 +64,15 @@ export default function Hero() {
         playsInline
         loop
         preload="metadata"
-        poster="/images/chicago-hero.jpg"
+        poster="/images/chicago-hero.jpg"  {/* keep your poster here */}
         controls={false}
         controlsList="nodownload nofullscreen noplaybackrate"
         aria-hidden="true"
       >
-        {/* Optional WebM first if present */}
-        <source src="/videos/hero.webm" type="video/webm" />
-        {/* MP4 fallback (must exist at this exact path/name) */}
-        <source src="/videos/chicago_drone_shot.mp4.mp4" type="video/mp4" />
+        {/* Optional WebM (only include if this file exists) */}
+        <source src="/images/hero.webm" type="video/webm" />
+        {/* MP4 from public/images (ensure the filename matches exactly) */}
+        <source src="/images/chicago_drone_shot.mp4" type="video/mp4" />
       </video>
 
       {/* stronger gradient for nav contrast */}
