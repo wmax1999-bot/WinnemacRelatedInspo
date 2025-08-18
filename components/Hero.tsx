@@ -5,7 +5,7 @@ export default function Hero() {
   return (
     <section className="relative h-[64vh] min-h-[560px] w-full overflow-hidden">
       <Image
-        src="/images/chicago-hero.jpg.png"
+        src="/images/chicago_drone_shot.mp4.mp4"
         alt="Chicago skyline"
         fill
         priority
