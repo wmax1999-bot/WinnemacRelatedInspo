@@ -1,0 +1,46 @@
+[
+  {
+    "id": "prop-001",
+    "slug": "1154-w-lunt-apt-112",
+    "title": "1154 W Lunt \u2022 Apt 112",
+    "address": "1154 W Lunt Ave, Chicago, IL 60626",
+    "neighborhood": "Rogers Park",
+    "beds": 2,
+    "baths": 1,
+    "areaSqFt": 850,
+    "rentFrom": 1495,
+    "rentTo": 1695,
+    "available": "Now",
+    "images": [
+      "/images/sample1.jpg",
+      "/images/sample2.jpg"
+    ],
+    "amenities": [
+      "In-Unit Heat",
+      "Dishwasher",
+      "Hardwood Floors"
+    ],
+    "description": "Bright 2BR with updated kitchen, steps from the Red Line."
+  },
+  {
+    "id": "prop-002",
+    "slug": "616-monroe-apt-304",
+    "title": "The 616 \u2022 Apt 304",
+    "address": "616 Monroe Ave, Grand Rapids, MI 49503",
+    "neighborhood": "Downtown GR",
+    "beds": 1,
+    "baths": 1,
+    "areaSqFt": 620,
+    "rentFrom": 1399,
+    "images": [
+      "/images/sample3.jpg",
+      "/images/sample4.jpg"
+    ],
+    "amenities": [
+      "Fitness Center",
+      "Package Room",
+      "Keyless Entry"
+    ],
+    "description": "Sleek 1BR with city views and premium finishes."
+  }
+]
