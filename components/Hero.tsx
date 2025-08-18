@@ -1,21 +1,25 @@
-import Link from "next/link";
+import SearchBar from "./SearchBar";
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="container py-20 md:py-28">
-        <h1 className="text-4xl md:text-6xl font-semibold leading-tight">
-          Homes that feel <span className="text-brand">effortless</span>.
-        </h1>
-        <p className="text-gray-600 max-w-2xl mt-4">
-          Modern apartments in vibrant neighborhoods—designed for everyday living.
-        </p>
-        <div className="mt-8 flex gap-3">
-          <Link href="/properties" className="px-5 py-3 rounded-xl border">Browse Properties</Link>
-          <Link href="/contact" className="px-5 py-3 rounded-xl border">Schedule a Tour</Link>
+    <section className="relative h-[60vh] min-h-[520px] w-full overflow-hidden">
+      <img
+        src="/images/chicago-hero.jpg"
+        alt="Chicago skyline"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
+      <div className="relative container h-full flex items-end pb-12">
+        <div className="text-white">
+          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight">Chicago Residences</h1>
+          <p className="mt-2 text-white/90 max-w-xl">
+            Modern apartments in Rogers Park, Edgewater, and beyond.
+          </p>
+          <div className="mt-6">
+            <SearchBar />
+          </div>
         </div>
       </div>
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(600px_circle_at_10%_10%,#e0f2ff,transparent),radial-gradient(600px_circle_at_90%_20%,#f0f9ff,transparent)]" />
     </section>
   );
 }
