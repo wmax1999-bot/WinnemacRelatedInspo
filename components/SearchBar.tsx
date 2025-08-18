@@ -48,3 +48,17 @@ export default function SearchBar() {
 
       <input
         value={max}
+        onChange={(e) => setMax(e.target.value)}
+        type="number"
+        min={0}
+        placeholder="Max $"
+        className="px-4 py-2 rounded-xl border bg-white w-28 text-gray-900 placeholder-gray-600"
+        aria-label="Maximum rent"
+      />
+
+      <button className="px-5 py-2 rounded-xl bg-black text-white">
+        Search
+      </button>
+    </form>
+  );
+}
