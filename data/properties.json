@@ -25,14 +25,14 @@
   },
   {
     "id": "prop-002",
-    "slug": "616-monroe-apt-304",
+    "slug": "616-Fulton-apt-304",
     "title": "The 616 \u2022 Apt 304",
-    "address": "616 Monroe Ave, Grand Rapids, MI 49503",
+    "address": "616 Fulton St, Grand Rapids, MI 49504",
     "neighborhood": "Downtown GR",
     "beds": 1,
     "baths": 1,
     "areaSqFt": 620,
-    "rentFrom": 1399,
+    "rentFrom": 1695,
     "images": [
       "/images/sample3.jpg",
       "/images/sample4.jpg"
