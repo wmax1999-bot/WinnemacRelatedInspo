@@ -41,4 +41,66 @@ export default function Hero() {
     // Fallback: start on first user gesture (iOS Low Power Mode, etc.)
     const onUserGesture = () => {
       if (v.paused) v.play().catch(() => {});
-      window.re
+      window.removeEventListener("touchstart", onUserGesture);
+      window.removeEventListener("click", onUserGesture);
+    };
+    window.addEventListener("touchstart", onUserGesture, { once: true });
+    window.addEventListener("click", onUserGesture, { once: true });
+
+    return () => {
+      window.removeEventListener("touchstart", onUserGesture);
+      window.removeEventListener("click", onUserGesture);
+    };
+  }, []);
+
+  return (
+    <section className="relative h-[64vh] min-h-[560px] w-full overflow-hidden">
+      {/* Background video */}
+      <video
+        ref={videoRef}
+        className="absolute inset-0 h-full w-full object-cover"
+        autoPlay
+        muted
+        playsInline
+        loop
+        preload="metadata"
+        poster="/images/chicago-hero.jpg"
+        controls={false}
+        controlsList="nodownload nofullscreen noplaybackrate"
+        aria-hidden="true"
+      >
+        {/* Optional WebM first if present */}
+        <source src="/videos/hero.webm" type="video/webm" />
+        {/* MP4 fallback (must exist at this exact path/name) */}
+        <source src="/videos/chicago_drone_shot.mp4.mp4" type="video/mp4" />
+      </video>
+
+      {/* stronger gradient for nav contrast */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/35 to-transparent" />
+
+      {/* Content */}
+      <div className="relative container h-full flex items-end pb-12">
+        <div className="text-white">
+          <h1 className="text-5xl md:text-6xl font-semibold tracking-tight drop-shadow">
+            Chicago Residences
+          </h1>
+          <p className="mt-2 text-white/90 max-w-xl">
+            Modern apartments in Rogers Park, Edgewater, and beyond.
+          </p>
+          <div className="mt-6">
+            <SearchBar />
+          </div>
+
+          {needsTap && (
+            <button
+              onClick={() => videoRef.current?.play().catch(() => {})}
+              className="mt-4 px-4 py-2 rounded-xl bg-white/90 text-gray-900"
+            >
+              Tap to Play
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
