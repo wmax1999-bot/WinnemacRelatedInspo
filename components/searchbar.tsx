@@ -19,16 +19,38 @@ export default function SearchBar() {
 
   return (
     <form onSubmit={go} className="flex flex-wrap gap-2 bg-white/95 rounded-2xl p-2 shadow">
-      <select value={beds} onChange={e=>setBeds(e.target.value)} className="px-4 py-2 rounded-xl border bg-white">
+      <select
+        value={beds}
+        onChange={(e) => setBeds(e.target.value)}
+        className="px-4 py-2 rounded-xl border bg-white"
+      >
         <option value="">Beds</option>
         <option value="0">Studio+</option>
         <option value="1">1+</option>
         <option value="2">2+</option>
         <option value="3">3+</option>
       </select>
-      <input value={min} onChange={e=>setMin(e.target.value)} type="number" min={0} placeholder="Min $" className="px-4 py-2 rounded-xl border bg-white w-28" />
-      <input value={max} onChange={e=>setMax(e.target.value)} type="number" min={0} placeholder="Max $" className="px-4 py-2 rounded-xl border bg-white w-28" />
-      <button className="px-5 py-2 rounded-xl bg-black text-white">Search</button>
+
+      <input
+        value={min}
+        onChange={(e) => setMin(e.target.value)}
+        type="number"
+        min={0}
+        placeholder="Min $"
+        className="px-4 py-2 rounded-xl border bg-white w-28"
+      />
+      <input
+        value={max}
+        onChange={(e) => setMax(e.target.value)}
+        type="number"
+        min={0}
+        placeholder="Max $"
+        className="px-4 py-2 rounded-xl border bg-white w-28"
+      />
+
+      <button className="px-5 py-2 rounded-xl bg-black text-white">
+        Search
+      </button>
     </form>
   );
 }
