@@ -9,7 +9,7 @@ export default async function HomePage() {
   return (
     <div>
       <Hero />
-     <section className="container -mt-10">
+     <section className="container -mt-10 md:mt-14">
   <div className="bg-white rounded-2xl shadow-sm p-6 md:p-8">
     <SectionHeader title="Featured Residences" subtitle="Curated homes available now" />
     <PropertyGrid properties={properties.slice(0, 6)} />
