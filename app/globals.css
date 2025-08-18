@@ -3,15 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --bg: 248 250 252;
-  --fg: 17 24 39;
+  --bg: 248 250 252; /* slate-50 */
+  --fg: 17 24 39;    /* gray-900 */
 }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
+body { color: rgb(var(--fg)); background: rgb(var(--bg)); }
 
-body {
-  color: rgb(var(--fg));
-  background: rgb(var(--bg));
-}
+/* Luxury-ish headings */
+h1,h2,h3 { letter-spacing: -0.01em; }
