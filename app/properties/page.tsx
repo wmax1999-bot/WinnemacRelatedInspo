@@ -1,9 +1,9 @@
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import { getAllProperties } from "@/lib/data";
 import PropertyGrid from "@/components/PropertyGrid";
 import SectionHeader from "@/components/SectionHeader";
 
-const ShowMojoEmbed = dynamic(() => import("@/components/ShowMojoEmbed"), { ssr: false });
+const ShowMojoEmbed = nextDynamic(() => import("@/components/ShowMojoEmbed"), { ssr: false });
 
 export const dynamic = "force-static";
 
@@ -19,7 +19,7 @@ export default async function PropertiesPage({
   const min = Number(searchParams.min ?? 0);
   const max = Number(searchParams.max ?? 0);
 
-  const filtered = properties.filter(p => {
+  const filtered = properties.filter((p) => {
     const byBeds = beds ? p.beds >= beds : true;
     const byMin = min ? p.rentFrom >= min : true;
     const byMax = max ? (p.rentTo ?? p.rentFrom) <= max : true;
