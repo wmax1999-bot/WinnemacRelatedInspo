@@ -55,7 +55,7 @@ export default function Hero() {
 
   return (
     <section className="relative h-[64vh] min-h-[560px] w-full overflow-hidden">
-      {/* Background video */}
+      {/* Background video from /public/images */}
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
@@ -64,14 +64,14 @@ export default function Hero() {
         playsInline
         loop
         preload="metadata"
-        poster="/images/chicago-hero.jpg"  {/* keep your poster here */}
+        poster="/images/chicago-hero.jpg"
         controls={false}
         controlsList="nodownload nofullscreen noplaybackrate"
         aria-hidden="true"
       >
-        {/* Optional WebM (only include if this file exists) */}
+        {/* Include this only if the file exists */}
         <source src="/images/hero.webm" type="video/webm" />
-        {/* MP4 from public/images (ensure the filename matches exactly) */}
+        {/* MP4 fallback (ensure exact filename + case in /public/images) */}
         <source src="/images/chicago_drone_shot.mp4" type="video/mp4" />
       </video>
 
@@ -85,7 +85,7 @@ export default function Hero() {
             Chicago Residences
           </h1>
           <p className="mt-2 text-white/90 max-w-xl">
-            Modern apartments in Rogers Park, Edgewater, and beyond.
+            Modern apartments in Rogers Park, and Edgewater, and beyond.
           </p>
           <div className="mt-6">
             <SearchBar />
