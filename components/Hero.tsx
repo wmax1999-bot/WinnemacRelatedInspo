@@ -12,8 +12,8 @@ export default function Hero() {
         sizes="100vw"
         className="object-cover"
       />
-      {/* gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent" />
+      {/* stronger gradient for top-nav contrast */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/35 to-transparent" />
 
       <div className="relative container h-full flex items-end pb-12">
         <div className="text-white">
@@ -23,7 +23,6 @@ export default function Hero() {
           <p className="mt-2 text-white/90 max-w-xl">
             Modern apartments in Rogers Park, Edgewater, and beyond.
           </p>
-
           <div className="mt-6">
             <SearchBar />
           </div>
