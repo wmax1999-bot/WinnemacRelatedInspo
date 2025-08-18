@@ -1,20 +1,27 @@
-import Image from "next/image";
 import SearchBar from "@/components/SearchBar";
 
 export default function Hero() {
   return (
     <section className="relative h-[64vh] min-h-[560px] w-full overflow-hidden">
-      <Image
-        src="/images/chicago_drone_shot.mp4.mp4"
-        alt="Chicago skyline"
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover"
-      />
-      {/* stronger gradient for top-nav contrast */}
+      {/* Background video */}
+      <video
+        className="absolute inset-0 h-full w-full object-cover"
+        playsInline
+        muted
+        autoPlay
+        loop
+        preload="auto"
+        poster="/images/chicago-hero.jpg"
+      >
+        {/* WebM first (if present), then MP4 */}
+        <source src="/videos/hero.webm" type="video/webm" />
+        <source src="/videos/chicago_drone_shot.mp4.mp4" type="video/mp4" />
+      </video>
+
+      {/* stronger gradient for nav contrast */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/35 to-transparent" />
 
+      {/* Content */}
       <div className="relative container h-full flex items-end pb-12">
         <div className="text-white">
           <h1 className="text-5xl md:text-6xl font-semibold tracking-tight drop-shadow">
