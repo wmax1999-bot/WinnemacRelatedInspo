@@ -164,23 +164,23 @@ export function mapMojoToProperty(m: MojoListing): Property {
 
 /** Derive a building grouping key/label */
 export function buildingKey(m: MojoListing): { key: string; label: string } {
-  // Prefer the named building if present; otherwise fall back to street address.
-  const raw = (m.property_name || m.address || "").trim();
-  if (!raw) return { key: "other", label: "Other" };
+  // Prefer named building; otherwise street address
+  const primary = (m.property_name || m.address || "").trim();
+  if (!primary) return { key: "other", label: "Other" };
 
-  // Remove common trailing unit patterns:
-  //  - "Apt 3H", "Apt. - 3H", "Apartment 2B", "Unit 204", "#306"
-  //  - hyphen formats like " - 107" or "– 107" or "— 107"
-  let base = raw
-    // Apt / Apartment / Unit with optional dash/colon and unit token
+  // Use only the street line (before city/state commas)
+  let base = primary.split(",")[0];
+
+  // Strip trailing unit tokens and hyphenated unit suffixes
+  base = base
+    // "Apt 3H", "Apt. - 3H", "Apartment 2B", "Unit 204"
     .replace(/[, ]*(?:Apt\.?|Apartment|Unit)\s*[-:]?\s*[\w.-]+$/i, "")
-    // trailing "# 123"
+    // "#306"
     .replace(/\s*#\s*[\w.-]+$/i, "")
-    // trailing hyphen + token: " - 107", " – 107", " — 3H"
+    // " - 107", " – 107", " — 3H"
     .replace(/\s*[-–—]\s*[\w.-]+$/i, "")
-    // special "Apt. - 3H" (double safety)
-    .replace(/\s*Apt\.?\s*-\s*[\w.-]+$/i, "");
+    .trim();
 
-  const label = (base.trim() || raw).trim();
+  const label = base || primary;
   return { key: label.toLowerCase(), label };
 }
