@@ -3,9 +3,14 @@ import Link from "next/link";
 import type { Property } from "@/lib/types";
 
 export default function PropertyCard({ property }: { property: Property }) {
+  const href = property.scheduleUrl || `/properties/${property.slug}`;
+  const external = Boolean(property.scheduleUrl);
+
   return (
     <Link
-      href={`/properties/${property.slug}`}
+      href={href}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noopener noreferrer" : undefined}
       className="group rounded-2xl bg-white border shadow-sm overflow-hidden block"
     >
       <div className="relative aspect-[4/3] w-full">
@@ -24,12 +29,10 @@ export default function PropertyCard({ property }: { property: Property }) {
         <h3 className="text-lg font-medium">{property.title}</h3>
         <div className="text-sm text-gray-600">{property.address}</div>
         <div className="text-sm">
-          {property.beds} BR · {property.baths} BA
-          {property.areaSqFt ? ` · ${property.areaSqFt} SF` : ""}
+          {property.beds} BR · {property.baths} BA{property.areaSqFt ? ` · ${property.areaSqFt} SF` : ""}
         </div>
         <div className="pt-2 font-medium">
-          ${property.rentFrom}
-          {property.rentTo ? ` – $${property.rentTo}` : ""} / mo
+          ${property.rentFrom}{property.rentTo ? ` – $${property.rentTo}` : ""} / mo
         </div>
       </div>
     </Link>
