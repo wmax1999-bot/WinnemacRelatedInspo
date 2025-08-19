@@ -17,6 +17,8 @@ type MojoListing = {
   photos?: string[];
   description?: string;
   neighborhood?: string;
+  amenities?: string[];
+
 };
 
 export async function fetchMojoListings(): Promise<MojoListing[]> {
