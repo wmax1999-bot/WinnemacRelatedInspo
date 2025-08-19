@@ -1,74 +1,58 @@
-import nextDynamic from "next/dynamic";
-import { getAllProperties } from "@/lib/data";
+import { fetchMojoListings, mapMojoToProperty, buildingKey } from "@/lib/showmojo";
 import PropertyGrid from "@/components/PropertyGrid";
 import SectionHeader from "@/components/SectionHeader";
+import type { Property } from "@/lib/types";
 
-const ShowMojoEmbed = nextDynamic(() => import("@/components/ShowMojoEmbed"), { ssr: false });
+// Revalidate occasionally so the list stays fresh
+export const revalidate = 300; // 5 min
 
-export const dynamic = "force-dynamic"; // live ShowMojo data
+export default async function PropertiesPage() {
+  // Pull everything (you can pass { start: "2024-01-01", end: "2025-08-19" } if desired)
+  const rows = await fetchMojoListings();
+  const props: Property[] = rows.map(mapMojoToProperty);
 
-export default async function PropertiesPage({
-  searchParams
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
-  // 1) Your local JSON (kept as-is)
-  const properties = await getAllProperties();
-  const beds = Number(searchParams.beds ?? 0);
-  const min  = Number(searchParams.min ?? 0);
-  const max  = Number(searchParams.max ?? 0);
+  // Group by building
+  const groups = Object.values(
+    rows.reduce<Record<string, { label: string; items: Property[] }>>((acc, row, i) => {
+      const { key, label } = buildingKey(row);
+      if (!acc[key]) acc[key] = { label, items: [] };
+      acc[key].items.push(props[i]);
+      return acc;
+    }, {})
+  ).sort((a, b) => a.label.localeCompare(b.label));
 
-  const filteredLocal = properties.filter((p) => {
-    const byBeds = beds ? p.beds >= beds : true;
-    const byMin  = min  ? p.rentFrom >= min : true;
-    const byMax  = max  ? (p.rentTo ?? p.rentFrom) <= max : true;
-    return byBeds && byMin && byMax;
-  });
-
-  // 2) Live ShowMojo → grouped by building
-  const apiBase = process.env.NEXT_PUBLIC_SITE_URL || "";
-  let groups: { building: string; properties: typeof filteredLocal }[] = [];
-  try {
-    const res = await fetch(`${apiBase}/api/mojo`, { cache: "no-store" });
-    if (res.ok) {
-      const data = await res.json();
-      groups = data.groups || [];
-    }
-  } catch {
-    // swallow and fall back
+  // Fallback: if API returns nothing, show the ShowMojo iframe for now
+  if (groups.length === 0) {
+    return (
+      <section className="container py-12">
+        <SectionHeader title="All Properties" subtitle="Live from ShowMojo" />
+        <div className="rounded-2xl overflow-hidden ring-1 ring-black/10">
+          <iframe
+            className="w-full"
+            style={{ border: 0, height: 900 }}
+            name="ShowMojoListingFrame"
+            scrolling="yes"
+            frameBorder="0"
+            src="https://showmojo.com/981f1460d4/l"
+          />
+        </div>
+      </section>
+    );
   }
 
   return (
-    <section className="container py-12 space-y-12">
-      {/* Your existing block */}
-      <div>
-        <SectionHeader title="All Properties" subtitle="Browse current availability" />
-        <PropertyGrid properties={filteredLocal} />
-      </div>
+    <section className="container py-12">
+      <p className="text-sm text-gray-500 mb-6">This list is live from ShowMojo.</p>
 
-      {/* ShowMojo groups (only if API returned data) */}
-      {groups.length > 0 ? (
-        <div>
-          <h2 className="text-2xl font-semibold mb-2">Live Availability (Grouped by Building)</h2>
-          <p className="text-gray-600 mb-6">Sourced in real time from ShowMojo.</p>
-
-          <div className="space-y-10">
-            {groups.map((g: any) => (
-              <div key={g.building}>
-                <h3 className="text-xl font-semibold mb-4">{g.building}</h3>
-                <PropertyGrid properties={g.properties} />
-              </div>
-            ))}
-          </div>
+      {groups.map(({ label, items }) => (
+        <div key={label} className="mb-14">
+          <SectionHeader
+            title={label}
+            subtitle={`${items.length} home${items.length > 1 ? "s" : ""} available`}
+          />
+          <PropertyGrid properties={items} />
         </div>
-      ) : (
-        // Fallback: keep the iframe if API isn’t configured yet
-        <div>
-          <h2 className="text-2xl font-semibold mb-3">Schedule a Tour</h2>
-          <p className="text-gray-600 mb-6">This list is live from ShowMojo.</p>
-          <ShowMojoEmbed />
-        </div>
-      )}
+      ))}
     </section>
   );
 }
