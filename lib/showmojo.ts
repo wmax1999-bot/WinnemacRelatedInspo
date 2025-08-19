@@ -1,6 +1,6 @@
 import type { Property } from "@/lib/types";
 
-/** Shape of a ShowMojo listing row (keys vary by account/report) */
+/** ShowMojo row shape (keys vary by account/report) */
 export type MojoListing = {
   id?: string;
   code?: string;                // used for schedule URL
@@ -10,46 +10,115 @@ export type MojoListing = {
   city?: string;
   state?: string;
   postal_code?: string;
-  beds?: number;
-  baths?: number;
-  square_feet?: number;
-  rent?: number;
-  rent_high?: number;
+  beds?: number | string;
+  baths?: number | string;
+  square_feet?: number | string;
+  rent?: number | string;
+  rent_high?: number | string;
   photos?: string[];
   description?: string;
   neighborhood?: string;
+  amenities?: string[];
 };
 
-/** Fetch listings from ShowMojo “detailed_listing_data” report.
- *  Requires: SHOWMOJO_API_TOKEN in your env.
- */
-export async function fetchMojoListings(): Promise<MojoListing[]> {
-  const token = process.env.SHOWMOJO_API_TOKEN;
-  if (!token) return [];
+/** Optional report options you can pass from /api/mojo?start=YYYY-MM-DD&end=YYYY-MM-DD */
+export type ReportOpts = {
+  /** start date (YYYY-MM-DD or ISO string or Date) */
+  start?: string | Date;
+  /** end date (YYYY-MM-DD or ISO string or Date) */
+  end?: string | Date;
+  /** if your account uses “acting as master account” flag */
+  actingAsMasterAccount?: boolean;
+};
 
+/* ---------- helpers ---------- */
+
+function toNum(v: unknown): number | undefined {
+  if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
+  if (typeof v === "string") {
+    const n = parseFloat(v.replace(/[^0-9.]/g, ""));
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
+/** RFC3339 start-of-day UTC if date-only string */
+function toIsoStart(d: string | Date): string {
+  if (d instanceof Date) return d.toISOString();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return new Date(`${d}T00:00:00Z`).toISOString();
+  return new Date(d).toISOString();
+}
+
+/** RFC3339 end-of-day UTC if date-only string */
+function toIsoEnd(d: string | Date): string {
+  if (d instanceof Date) return d.toISOString();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return new Date(`${d}T23:59:59Z`).toISOString();
+  return new Date(d).toISOString();
+}
+
+/* ---------- core fetch ---------- */
+
+/**
+ * Fetch listings from ShowMojo “detailed_listing_data” report.
+ * Requires one of:
+ *   - SHOWMOJO_API_TOKEN   (recommended)
+ *   - SHOWMOJO_USER + SHOWMOJO_PASS (basic auth)
+ *
+ * You can pass { start, end } to filter by date range.
+ */
+export async function fetchMojoListings(opts: ReportOpts = {}): Promise<MojoListing[]> {
   const endpoint = "https://showmojo.com/api/v3/reports/detailed_listing_data";
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      // Token auth per ShowMojo
-      Authorization: `Token ${token}`,
-    },
-    cache: "no-store",
-  });
+
+  // --- Build Authorization header
+  let authHeader = "";
+  if (process.env.SHOWMOJO_API_TOKEN) {
+    // Most accounts accept either of these; start with the simple form
+    authHeader = `Token ${process.env.SHOWMOJO_API_TOKEN}`;
+    // If you ever see 401, try the quoted variant:
+    // authHeader = `Token token="${process.env.SHOWMOJO_API_TOKEN}"`;
+  } else if (process.env.SHOWMOJO_USER && process.env.SHOWMOJO_PASS) {
+    const b64 = Buffer.from(`${process.env.SHOWMOJO_USER}:${process.env.SHOWMOJO_PASS}`).toString("base64");
+    authHeader = `Basic ${b64}`;
+  } else {
+    // No credentials configured
+    return [];
+  }
+
+  // --- Form-encoded body per docs
+  const body = new URLSearchParams();
+  if (opts.start) body.set("start_date", toIsoStart(opts.start));
+  if (opts.end) body.set("end_date", toIsoEnd(opts.end));
+  if (opts.actingAsMasterAccount) body.set("acting_as_master_account", "true");
+
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "Content-Type": "application/x-www-form-urlencoded",
+    Authorization: authHeader,
+  };
+
+  // First attempt
+  let res = await fetch(endpoint, { method: "POST", headers, body, cache: "no-store" });
+
+  // If unauthorized with simple Token form, retry with quoted variant once.
+  if (res.status === 401 && process.env.SHOWMOJO_API_TOKEN && authHeader.startsWith("Token ")) {
+    headers.Authorization = `Token token="${process.env.SHOWMOJO_API_TOKEN}"`;
+    res = await fetch(endpoint, { method: "POST", headers, body, cache: "no-store" });
+  }
 
   if (!res.ok) return [];
+
   const json = await res.json();
   // Some accounts return { data: [...] }, others { listings: [...] }, others just [...]
   const rows: any[] = Array.isArray(json) ? json : (json?.data ?? json?.listings ?? []);
   return rows;
 }
 
-/** Map a ShowMojo row into our Property shape */
+/* ---------- mapping to your Property shape ---------- */
+
 export function mapMojoToProperty(m: MojoListing): Property {
   const addrLine = [
     m.address,
-    m.unit && !/unit|apt|#/.test(m.unit.toLowerCase()) ? `#${m.unit}` : m.unit,
+    m.unit && !/unit|apt|#/.test(String(m.unit).toLowerCase()) ? `#${m.unit}` : m.unit,
   ]
     .filter(Boolean)
     .join(" ");
@@ -64,26 +133,38 @@ export function mapMojoToProperty(m: MojoListing): Property {
 
   const scheduleUrl = m.code ? `https://showmojo.com/l/${m.code}` : undefined;
 
+  const beds = toNum(m.beds) ?? 0;
+  const baths = toNum(m.baths) ?? 0;
+  const sqft = toNum(m.square_feet);
+  const rentFrom = toNum(m.rent) ?? 0;
+  const rentTo = toNum(m.rent_high);
+
+  const amenities =
+    Array.isArray(m.amenities)
+      ? m.amenities.map(s => (s ?? "").toString().trim()).filter(Boolean)
+      : [];
+
+  const images = Array.isArray(m.photos) && m.photos.length > 0
+    ? m.photos
+    : ["/images/sample1.jpg"];
+
   return {
     id: m.id || m.code || slug,
     slug,
     title,
     address: addrLine || "",
     neighborhood: m.neighborhood || m.city || "",
-    beds: m.beds ?? 0,
-    baths: m.baths ?? 0,
-    areaSqFt: m.square_feet,
-    rentFrom: m.rent ?? 0,
-    rentTo: m.rent_high,
+    beds,
+    baths,
+    areaSqFt: sqft,
+    rentFrom,
+    rentTo,
     available: "TBA",
-    images: m.photos?.length ? m.photos : ["/images/sample1.jpg"],
-    amenities: [],
+    images,
+    amenities,
     description: m.description || "",
-    // add this optional field to your Property type if you haven’t yet
-    // (in lib/types.ts: scheduleUrl?: string)
-    // @ts-ignore
     scheduleUrl,
-  } as Property;
+  };
 }
 
 /** Derive a building grouping key/label */
