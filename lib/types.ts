@@ -117,3 +117,23 @@ export function buildingKey(m: MojoListing): { key: string; label: string } {
   const label = addr.replace(/\s*(?:apt|unit|#)\s*[\w-]+$/i, "");
   return { key: label.toLowerCase(), label };
 }
+// lib/types.ts
+
+export type Property = {
+  id: string;
+  slug: string;
+  title: string;
+  address: string;
+  neighborhood: string;
+  beds: number;
+  baths: number;
+  areaSqFt?: number;
+  rentFrom: number;
+  rentTo?: number;
+  available?: string;
+  images: string[];
+  amenities?: string[];
+  description?: string;
+  /** Present when sourced from ShowMojo */
+  scheduleUrl?: string;
+};
