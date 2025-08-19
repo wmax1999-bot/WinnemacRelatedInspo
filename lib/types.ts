@@ -1,4 +1,4 @@
-import type { Property } from "@/lib/types";
+export type { Property } from "@/lib/types";
 
 type MojoListing = {
   id?: string;
