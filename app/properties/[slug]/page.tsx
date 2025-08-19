@@ -63,13 +63,13 @@ export default async function PropertyDetail({ params }: Props) {
             Available: {property.available ?? "TBA"}
           </div>
 
-          {property.amenities?.length ? (
-            <ul className="list-disc list-inside text-sm">
-              {property.amenities.map((a: string) => (
-                <li key={a}>{a}</li>
-              ))}
-            </ul>
-          ) : null}
+            {Array.isArray(property.amenities) && property.amenities.length > 0 ? (
+    <ul className="list-disc list-inside text-sm">
+      {(property.amenities as string[]).map((a: string) => (
+        <li key={a}>{a}</li>
+      ))}
+    </ul>
+  ) : null}
 
           <div className="pt-4 flex gap-3">
             <a
