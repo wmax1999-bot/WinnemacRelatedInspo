@@ -1,27 +1,27 @@
-import { fetchMojoListings, mapMojoToProperty, buildingKey } from "@/lib/showmojo";
+// app/properties/page.tsx
+import { fetchMojoListings, mapMojoToProperty, buildingKey, type MojoListing } from "@/lib/showmojo";
 import PropertyGrid from "@/components/PropertyGrid";
 import SectionHeader from "@/components/SectionHeader";
 import type { Property } from "@/lib/types";
 
-// Revalidate occasionally so the list stays fresh
-export const revalidate = 300; // 5 min
+export const revalidate = 300; // 5 minutes
 
 export default async function PropertiesPage() {
-  // Pull everything (you can pass { start: "2024-01-01", end: "2025-08-19" } if desired)
-  const rows = await fetchMojoListings();
+  // Pull live data (pass dates if you want to restrict range)
+  const rows: MojoListing[] = await fetchMojoListings();
   const props: Property[] = rows.map(mapMojoToProperty);
 
-  // Group by building
+  // Group by building label derived from ShowMojo row
   const groups = Object.values(
-    rows.reduce<Record<string, { label: string; items: Property[] }>>((acc, row, i) => {
+    rows.reduce<Record<string, { label: string; items: Property[] }>>((acc, row, idx) => {
       const { key, label } = buildingKey(row);
       if (!acc[key]) acc[key] = { label, items: [] };
-      acc[key].items.push(props[i]);
+      acc[key].items.push(props[idx]);
       return acc;
     }, {})
   ).sort((a, b) => a.label.localeCompare(b.label));
 
-  // Fallback: if API returns nothing, show the ShowMojo iframe for now
+  // Fallback: if the API gives nothing, show the iframe so the page isn't empty
   if (groups.length === 0) {
     return (
       <section className="container py-12">
@@ -48,7 +48,7 @@ export default async function PropertiesPage() {
         <div key={label} className="mb-14">
           <SectionHeader
             title={label}
-            subtitle={`${items.length} home${items.length > 1 ? "s" : ""} available`}
+            subtitle={`${items.length} unit${items.length > 1 ? "s" : ""} available`}
           />
           <PropertyGrid properties={items} />
         </div>
