@@ -1,3 +1,4 @@
+// lib/showmojo.ts
 import type { Property } from "@/lib/types";
 
 /** ShowMojo row shape (keys vary by account/report) */
@@ -21,17 +22,13 @@ export type MojoListing = {
   amenities?: string[];
 };
 
-/** Optional report options you can pass from /api/mojo?start=YYYY-MM-DD&end=YYYY-MM-DD */
 export type ReportOpts = {
-  /** start date (YYYY-MM-DD or ISO string or Date) */
-  start?: string | Date;
-  /** end date (YYYY-MM-DD or ISO string or Date) */
-  end?: string | Date;
-  /** if your account uses “acting as master account” flag */
-  actingAsMasterAccount?: boolean;
+  start?: string | Date;              // YYYY-MM-DD or ISO or Date
+  end?: string | Date;                // YYYY-MM-DD or ISO or Date
+  actingAsMasterAccount?: boolean;    // optional flag
 };
 
-/* ---------- helpers ---------- */
+/* ---------------- helpers ---------------- */
 
 function toNum(v: unknown): number | undefined {
   if (typeof v === "number") return Number.isFinite(v) ? v : undefined;
@@ -56,7 +53,7 @@ function toIsoEnd(d: string | Date): string {
   return new Date(d).toISOString();
 }
 
-/* ---------- core fetch ---------- */
+/* ---------------- fetch core ---------------- */
 
 /**
  * Fetch listings from ShowMojo “detailed_listing_data” report.
@@ -69,25 +66,23 @@ function toIsoEnd(d: string | Date): string {
 export async function fetchMojoListings(opts: ReportOpts = {}): Promise<MojoListing[]> {
   const endpoint = "https://showmojo.com/api/v3/reports/detailed_listing_data";
 
-  // --- Build Authorization header
+  // Build Authorization header
   let authHeader = "";
   if (process.env.SHOWMOJO_API_TOKEN) {
-    // Most accounts accept either of these; start with the simple form
     authHeader = `Token ${process.env.SHOWMOJO_API_TOKEN}`;
-    // If you ever see 401, try the quoted variant:
+    // If 401, some accounts require the quoted variant:
     // authHeader = `Token token="${process.env.SHOWMOJO_API_TOKEN}"`;
   } else if (process.env.SHOWMOJO_USER && process.env.SHOWMOJO_PASS) {
     const b64 = Buffer.from(`${process.env.SHOWMOJO_USER}:${process.env.SHOWMOJO_PASS}`).toString("base64");
     authHeader = `Basic ${b64}`;
   } else {
-    // No credentials configured
     return [];
   }
 
-  // --- Form-encoded body per docs
+  // Form-encoded body per docs
   const body = new URLSearchParams();
   if (opts.start) body.set("start_date", toIsoStart(opts.start));
-  if (opts.end) body.set("end_date", toIsoEnd(opts.end));
+  if (opts.end)   body.set("end_date",   toIsoEnd(opts.end));
   if (opts.actingAsMasterAccount) body.set("acting_as_master_account", "true");
 
   const headers: Record<string, string> = {
@@ -99,8 +94,8 @@ export async function fetchMojoListings(opts: ReportOpts = {}): Promise<MojoList
   // First attempt
   let res = await fetch(endpoint, { method: "POST", headers, body, cache: "no-store" });
 
-  // If unauthorized with simple Token form, retry with quoted variant once.
-  if (res.status === 401 && process.env.SHOWMOJO_API_TOKEN && authHeader.startsWith("Token ")) {
+  // If unauthorized with simple Token form, retry with quoted variant once
+  if (res.status === 401 && process.env.SHOWMOJO_API_TOKEN && headers.Authorization.startsWith("Token ")) {
     headers.Authorization = `Token token="${process.env.SHOWMOJO_API_TOKEN}"`;
     res = await fetch(endpoint, { method: "POST", headers, body, cache: "no-store" });
   }
@@ -113,18 +108,17 @@ export async function fetchMojoListings(opts: ReportOpts = {}): Promise<MojoList
   return rows;
 }
 
-/* ---------- mapping to your Property shape ---------- */
+/* ---------------- mapping ---------------- */
 
 export function mapMojoToProperty(m: MojoListing): Property {
   const addrLine = [
     m.address,
     m.unit && !/unit|apt|#/.test(String(m.unit).toLowerCase()) ? `#${m.unit}` : m.unit,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  ].filter(Boolean).join(" ");
 
-  const title =
-    m.property_name ? `${m.property_name}${m.unit ? ` • ${m.unit}` : ""}` : addrLine || "Residence";
+  const title = m.property_name
+    ? `${m.property_name}${m.unit ? ` • ${m.unit}` : ""}`
+    : addrLine || "Residence";
 
   const slug = (title || m.code || m.id || "listing")
     .toLowerCase()
@@ -144,9 +138,10 @@ export function mapMojoToProperty(m: MojoListing): Property {
       ? m.amenities.map(s => (s ?? "").toString().trim()).filter(Boolean)
       : [];
 
-  const images = Array.isArray(m.photos) && m.photos.length > 0
-    ? m.photos
-    : ["/images/sample1.jpg"];
+  const images =
+    Array.isArray(m.photos) && m.photos.length > 0
+      ? m.photos
+      : ["/images/sample1.jpg"];
 
   return {
     id: m.id || m.code || slug,
