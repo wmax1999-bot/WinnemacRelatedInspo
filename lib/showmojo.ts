@@ -164,11 +164,23 @@ export function mapMojoToProperty(m: MojoListing): Property {
 
 /** Derive a building grouping key/label */
 export function buildingKey(m: MojoListing): { key: string; label: string } {
-  if (m.property_name) {
-    const label = m.property_name.trim();
-    return { key: label.toLowerCase(), label };
-  }
-  const addr = (m.address || "").trim();
-  const label = addr.replace(/\s*(?:apt|unit|#)\s*[\w-]+$/i, "");
+  // Prefer the named building if present; otherwise fall back to street address.
+  const raw = (m.property_name || m.address || "").trim();
+  if (!raw) return { key: "other", label: "Other" };
+
+  // Remove common trailing unit patterns:
+  //  - "Apt 3H", "Apt. - 3H", "Apartment 2B", "Unit 204", "#306"
+  //  - hyphen formats like " - 107" or "– 107" or "— 107"
+  let base = raw
+    // Apt / Apartment / Unit with optional dash/colon and unit token
+    .replace(/[, ]*(?:Apt\.?|Apartment|Unit)\s*[-:]?\s*[\w.-]+$/i, "")
+    // trailing "# 123"
+    .replace(/\s*#\s*[\w.-]+$/i, "")
+    // trailing hyphen + token: " - 107", " – 107", " — 3H"
+    .replace(/\s*[-–—]\s*[\w.-]+$/i, "")
+    // special "Apt. - 3H" (double safety)
+    .replace(/\s*Apt\.?\s*-\s*[\w.-]+$/i, "");
+
+  const label = (base.trim() || raw).trim();
   return { key: label.toLowerCase(), label };
 }
